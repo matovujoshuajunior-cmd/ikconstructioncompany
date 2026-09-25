@@ -4,6 +4,30 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
+<!--
+  ==========================================================================
+  ⚡ IMAGE PERFORMANCE — READ ME (one-time setup for 10x faster loading) ⚡
+  ==========================================================================
+  Your images are the main reason the site loads slowly. The code below
+  already does everything a browser can do, but the actual files must
+  also be optimised once.
+
+  STEP 1 — Resize: no image needs to be wider than 1200px. Downscale all
+           photos in any free tool (TinyPNG, Squoosh.app, ImageOptim, or
+           Windows Photos > Resize).
+  STEP 2 — Compress: save JPEGs at ~75–80% quality. This alone usually
+           takes a 3 MB phone photo down to 150–300 KB.
+  STEP 3 — (Optional) Convert to WebP: Squoosh.app can do this in one click.
+           WebP is ~30% smaller than JPEG at the same quality. If you convert,
+           just rename the extension and keep the same filename pattern.
+  STEP 4 — Keep the exact same filenames so nothing below breaks.
+
+  Bonus: the biggest wins come from your largest files — the recent project
+  photos, hero background, and carousel images. Optimise those 6–8 first
+  and you'll feel the difference immediately.
+  ==========================================================================
+-->
+
 <!-- ==================== SEO: PRIMARY ==================== -->
 <title>IK Construction Company Uganda | Building Contractors Kampala | Free Quote</title>
 <meta name="description" content="IK Construction Company – trusted building contractors in Kampala, Uganda since 2012. Residential & commercial construction, finishing, architecture, plumbing, electrical & renovations. 250+ happy clients. Get a free quote today." />
@@ -37,15 +61,21 @@
 
 <link rel="icon" href="logo.jpg" type="image/jpeg" />
 
-<!-- PERFORMANCE -->
+<!-- ==================== PERFORMANCE HINTS ==================== -->
 <link rel="preconnect" href="https://cdn.jsdelivr.net" />
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
+<!-- ⚡ Preload the hero background image so it starts downloading immediately -->
+<link rel="preload" as="image" href="seyyid.jpg" fetchpriority="high" />
+
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+<!-- ⚡ Flag that JS is enabled — used to enable the fade-in effect only when JS can undo it -->
+<script>document.documentElement.className += ' js-enabled';</script>
 
 <!-- ==================== STRUCTURED DATA ==================== -->
 <script type="application/ld+json">
@@ -87,26 +117,10 @@
   "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "After inquiring for your services, are you responsible for material search or am I responsible?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Material supply depends on negotiation between us and the client. If you prefer handling the task, we cooperate strongly with your suppliers. If you hand over the task to our team, we involve our trustworthy suppliers." }
-    },
-    {
-      "@type": "Question",
-      "name": "Do you have authorised skilled and trained labour for our projects?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Yes, we use registered, approved architects, civil engineers, mechanical engineers, builders, and certified craftsmen, each with a minimum national certificate and 6 months of verifiable experience." }
-    },
-    {
-      "@type": "Question",
-      "name": "How do you handle legal building laws enforcement for all building classes?",
-      "acceptedAnswer": { "@type": "Answer", "text": "We strictly follow and enforce legal building laws. During consultation, we help clients understand how to obtain building permits and avoid penalties, ensuring full compliance." }
-    },
-    {
-      "@type": "Question",
-      "name": "How far do you operate from your headquarters?",
-      "acceptedAnswer": { "@type": "Answer", "text": "We are highly versatile and can operate in every region of Uganda, as long as the site is accessible and basic human needs are available." }
-    }
+    { "@type": "Question", "name": "After inquiring for your services, are you responsible for material search or am I responsible?", "acceptedAnswer": { "@type": "Answer", "text": "Material supply depends on negotiation between us and the client. If you prefer handling the task, we cooperate strongly with your suppliers. If you hand over the task to our team, we involve our trustworthy suppliers." } },
+    { "@type": "Question", "name": "Do you have authorised skilled and trained labour for our projects?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, we use registered, approved architects, civil engineers, mechanical engineers, builders, and certified craftsmen, each with a minimum national certificate and 6 months of verifiable experience." } },
+    { "@type": "Question", "name": "How do you handle legal building laws enforcement for all building classes?", "acceptedAnswer": { "@type": "Answer", "text": "We strictly follow and enforce legal building laws. During consultation, we help clients understand how to obtain building permits and avoid penalties, ensuring full compliance." } },
+    { "@type": "Question", "name": "How far do you operate from your headquarters?", "acceptedAnswer": { "@type": "Answer", "text": "We are highly versatile and can operate in every region of Uganda, as long as the site is accessible and basic human needs are available." } }
   ]
 }
 </script>
@@ -144,6 +158,33 @@ img{max-width:100%;display:block;}
 a{color:inherit;}
 button{font-family:inherit;}
 
+/* ============================================================
+   ⚡ IMAGE LOADING — SKELETON SHIMMER + FADE-IN
+   Only applied when JS is enabled (html.js-enabled).
+   Without JS, images render normally with no hiding.
+   ============================================================ */
+html.js-enabled img.lazy-img{
+  background:linear-gradient(90deg,#ece6d8 0%,#f5f0e4 50%,#ece6d8 100%);
+  background-size:200% 100%;
+  animation:imgShimmer 1.6s ease-in-out infinite;
+  opacity:.001;
+  transition:opacity .45s ease;
+}
+html.js-enabled img.lazy-img.loaded{
+  animation:none;
+  opacity:1;
+  background:transparent;
+}
+@keyframes imgShimmer{
+  0%   { background-position: 200% 0; }
+  100% { background-position:-200% 0; }
+}
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion:reduce){
+  html.js-enabled img.lazy-img{animation:none;opacity:1;background:transparent;}
+  html.js-enabled img.lazy-img.loaded{transition:none;}
+}
+
 .container-custom{max-width:1280px;margin:0 auto;padding:0 20px;}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
 
@@ -158,7 +199,7 @@ button{font-family:inherit;}
 .btn-custom:focus-visible{outline:3px solid var(--gold);outline-offset:2px;}
 
 /* =====================================================
-   HEADER — ORIGINAL STICKY NAV STRUCTURE (as you provided)
+   HEADER — ORIGINAL STICKY NAV (preserved)
    ===================================================== */
 .sticky-nav {
     position: sticky;
@@ -175,7 +216,6 @@ button{font-family:inherit;}
     align-items: center;
     box-shadow: 0 2px 12px rgba(0,0,0,.18);
 }
-
 .top-contact-bar {
     background-color: #000;
     color: #e0e0d0;
@@ -188,19 +228,8 @@ button{font-family:inherit;}
     align-items: center;
     border-bottom: 1px solid #2a3a2a;
 }
-
-.top-contact-bar i {
-    margin-right: 6px;
-    color: #e3b87c;
-}
-
-.top-contact-bar span {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    white-space: nowrap;
-}
-
+.top-contact-bar i { margin-right: 6px; color: #e3b87c; }
+.top-contact-bar span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 .top-contact-bar a{color:#e0e0d0;text-decoration:none;transition:color .2s;}
 .top-contact-bar a:hover{color:#fadc9f;}
 
@@ -211,10 +240,7 @@ button{font-family:inherit;}
         gap: 12px;
         padding: 8px 12px;
     }
-    .top-contact-bar span {
-        white-space: normal;
-        word-break: keep-all;
-    }
+    .top-contact-bar span { white-space: normal; word-break: keep-all; }
 }
 
 .main-nav {
@@ -222,7 +248,6 @@ button{font-family:inherit;}
     padding: 0 16px;
     border-radius: 40px;
 }
-
 .main-nav ul {
     list-style: none;
     display: flex;
@@ -232,7 +257,6 @@ button{font-family:inherit;}
     margin: 0;
     padding: 0;
 }
-
 .main-nav ul li a {
     display: inline-block;
     padding: 12px 16px;
@@ -244,25 +268,12 @@ button{font-family:inherit;}
     font-size: 0.95rem;
     cursor: pointer;
 }
-
-.main-nav ul li a:hover {
-    background-color: #2c5e1a;
-    transform: translateY(-1px);
-}
-
-.main-nav ul li a.active{
-    background-color:#2c5e1a;
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,.25);
-}
+.main-nav ul li a:hover { background-color: #2c5e1a; transform: translateY(-1px); }
+.main-nav ul li a.active{ background-color:#2c5e1a; box-shadow: inset 0 0 0 1px rgba(255,255,255,.25); }
 
 @media (max-width: 576px) {
-    .main-nav ul {
-        justify-content: center;
-    }
-    .main-nav ul li a {
-        padding: 8px 12px;
-        font-size: 0.85rem;
-    }
+    .main-nav ul { justify-content: center; }
+    .main-nav ul li a { padding: 8px 12px; font-size: 0.85rem; }
 }
 
 /* ============ PAGE SWITCHING (SPA) ============ */
@@ -291,10 +302,14 @@ button{font-family:inherit;}
 /* ============ HERO (HOME) ============ */
 .hero-banner{
   position:relative;min-height:520px;display:flex;align-items:center;
-  background:linear-gradient(0deg,rgba(0,0,0,.68),rgba(0,0,0,.35)),url('seyyid.jpg') center/cover no-repeat;
+  background:#1a1a1a url('seyyid.jpg') center/cover no-repeat;
   border-radius:0 0 32px 32px;margin-bottom:1rem;
 }
-.hero-overlay{width:100%;padding:2.5rem 1.5rem;color:#fff;}
+.hero-banner::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;
+  background:linear-gradient(0deg,rgba(0,0,0,.68),rgba(0,0,0,.35));pointer-events:none;
+}
+.hero-overlay{width:100%;padding:2.5rem 1.5rem;color:#fff;position:relative;z-index:1;}
 .hero-title{
   font-size:clamp(2rem,7vw,4rem);font-weight:900;line-height:1.12;
   text-shadow:2px 3px 14px rgba(0,0,0,.45);letter-spacing:-.5px;
@@ -352,8 +367,8 @@ button{font-family:inherit;}
 .project-caption{padding:14px 16px;text-align:center;font-weight:600;color:var(--forest-dark);font-size:.92rem;}
 .project-caption i{color:var(--gold);margin-right:6px;}
 
-/* ============ SERVICES CAROUSEL (original services page) ============ */
-.c-item{height:440px;border-radius:0 0 32px 32px;overflow:hidden;}
+/* ============ SERVICES CAROUSEL ============ */
+.c-item{height:440px;border-radius:0 0 32px 32px;overflow:hidden;background:#1a1a1a;}
 .c-img{height:100%;object-fit:cover;filter:brightness(.62);}
 .carousel-caption-custom{
   position:absolute;top:0;left:0;right:0;bottom:0;
@@ -369,9 +384,7 @@ button{font-family:inherit;}
   text-shadow:2px 3px 12px rgba(0,0,0,.5);margin-bottom:1rem;max-width:640px;
 }
 .carousel-caption-custom .btn-custom{margin-top:.4rem;}
-@media (max-width:640px){
-  .c-item{height:360px;}
-}
+@media (max-width:640px){ .c-item{height:360px;} }
 
 /* ============ SERVICES DEEP GRID ============ */
 .services-deep-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px;margin:24px 0 40px;}
@@ -385,7 +398,7 @@ button{font-family:inherit;}
 .service-card h3{font-size:1.35rem;font-weight:700;margin:6px 0 10px;color:#2d3e2b;}
 .service-card p{color:var(--ink-soft);line-height:1.5;flex-grow:1;margin-bottom:18px;font-size:.92rem;}
 .service-card .btn-custom{align-self:flex-start;}
-@media (max-width:576px){.service-card img{height:170px;}}
+@media (max-width:576px){ .service-card img{height:170px;} }
 
 /* ============ ABOUT ============ */
 .about-highlight{background:var(--bg-alt);padding:36px;border-radius:32px;margin:30px 0;}
@@ -457,7 +470,7 @@ button{font-family:inherit;}
 .contact-form .btn:hover{background:var(--primary-dark);transform:translateY(-2px);}
 #formFeedback{margin-top:12px;font-weight:600;font-size:.9rem;}
 
-/* ============ FOOTER (original) ============ */
+/* ============ FOOTER ============ */
 footer{
   background-color:#0a0f0a;border-top-left-radius:40px;border-top-right-radius:40px;
   margin-top:60px;padding:48px 0 24px;color:#ddddcc;
@@ -603,7 +616,7 @@ footer{
 <body>
 
 <!-- =====================================================
-     HEADER — ORIGINAL STICKY NAV STRUCTURE (preserved)
+     HEADER — ORIGINAL STICKY NAV
      ===================================================== -->
 <div class="sticky-nav">
     <div class="top-contact-bar">
@@ -629,7 +642,6 @@ footer{
 <!-- ============================================================= -->
 <section id="page-home" class="page-section is-active" data-page="home" aria-label="Home page">
 
-  <!-- HERO (uses seyyid.jpg as in original home) -->
   <div class="hero-banner" role="img" aria-label="IK Construction Company project site in Kampala, Uganda">
     <div class="hero-overlay container-custom">
       <h1 class="hero-title">IK CONSTRUCTION<br>COMPANY</h1>
@@ -696,19 +708,19 @@ footer{
     <h2 class="section-title">Recent Completed Projects &amp; Sites</h2>
     <div class="projects-grid">
       <article class="project-item">
-        <img src="RECENT PROJECT 1.jpg" alt="Rubaga Heights residential complex completed by IK Construction in Kampala, Uganda" loading="lazy" width="400" height="220" />
+        <img class="lazy-img" src="RECENT PROJECT 1.jpg" alt="Rubaga Heights residential complex completed by IK Construction in Kampala, Uganda" loading="lazy" decoding="async" width="400" height="220" />
         <div class="project-caption"><i class="fas fa-map-pin"></i> Rubaga Heights | Residential</div>
       </article>
       <article class="project-item">
-        <img src="jk.jpg" alt="MRC Plaza commercial building project in Kampala by IK Construction" loading="lazy" width="400" height="220" />
+        <img class="lazy-img" src="jk.jpg" alt="MRC Plaza commercial building project in Kampala by IK Construction" loading="lazy" decoding="async" width="400" height="220" />
         <div class="project-caption"><i class="fas fa-building"></i> MRC Plaza | Commercial</div>
       </article>
       <article class="project-item">
-        <img src="RECENT PROJECT 2.jpg" alt="JK Education Centre social infrastructure school construction project in Uganda" loading="lazy" width="400" height="220" />
+        <img class="lazy-img" src="RECENT PROJECT 2.jpg" alt="JK Education Centre social infrastructure school construction project in Uganda" loading="lazy" decoding="async" width="400" height="220" />
         <div class="project-caption"><i class="fas fa-school"></i> JK Education Centre | Social</div>
       </article>
       <article class="project-item">
-        <img src="RECENT PROJECT 3.jpg" alt="Luxury villa with premium finishing in Kampala, built by IK Construction" loading="lazy" width="400" height="220" />
+        <img class="lazy-img" src="RECENT PROJECT 3.jpg" alt="Luxury villa with premium finishing in Kampala, built by IK Construction" loading="lazy" decoding="async" width="400" height="220" />
         <div class="project-caption"><i class="fas fa-home"></i> Kampala Villas | Luxury</div>
       </article>
     </div>
@@ -750,7 +762,6 @@ footer{
 <!-- ============================================================= -->
 <section id="page-services" class="page-section" data-page="services" aria-label="Services page">
 
-  <!-- Original services carousel: plan work.jpg / construction.jpg / finishing.jpg -->
   <div id="servicesCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4500">
     <div class="carousel-indicators">
       <button type="button" data-bs-target="#servicesCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Planning and Consultations"></button>
@@ -759,7 +770,7 @@ footer{
     </div>
     <div class="carousel-inner">
       <div class="carousel-item active c-item">
-        <img src="plan work.jpg" class="d-block w-100 c-img" alt="Planning and Consultations for construction projects in Kampala" loading="lazy" width="1200" height="440" />
+        <img class="d-block w-100 c-img lazy-img" src="plan work.jpg" alt="Planning and Consultations for construction projects in Kampala" loading="eager" decoding="async" fetchpriority="high" width="1200" height="440" />
         <div class="carousel-caption-custom">
           <p class="eyebrow">We provide reliable</p>
           <h2>Planning and Consultations.</h2>
@@ -767,7 +778,7 @@ footer{
         </div>
       </div>
       <div class="carousel-item c-item">
-        <img src="construction.jpg" class="d-block w-100 c-img" alt="Building and Construction services by IK Construction in Uganda" loading="lazy" width="1200" height="440" />
+        <img class="d-block w-100 c-img lazy-img" src="construction.jpg" alt="Building and Construction services by IK Construction in Uganda" loading="lazy" decoding="async" width="1200" height="440" />
         <div class="carousel-caption-custom">
           <p class="eyebrow">We exhibit our skills in</p>
           <h2>Building and Construction</h2>
@@ -775,7 +786,7 @@ footer{
         </div>
       </div>
       <div class="carousel-item c-item">
-        <img src="finishing.jpg" class="d-block w-100 c-img" alt="Luxury finishing and designing services in Kampala" loading="lazy" width="1200" height="440" />
+        <img class="d-block w-100 c-img lazy-img" src="finishing.jpg" alt="Luxury finishing and designing services in Kampala" loading="lazy" decoding="async" width="1200" height="440" />
         <div class="carousel-caption-custom">
           <p class="eyebrow">We use the latest and luxury</p>
           <h2>Finishing and Designing.</h2>
@@ -799,70 +810,70 @@ footer{
 
     <div class="services-deep-grid">
       <article class="service-card">
-        <img src="construction.jpg" alt="Building and Construction services by IK Construction Uganda" loading="lazy" width="400" height="200" />
+        <img class="lazy-img" src="construction.jpg" alt="Building and Construction services by IK Construction Uganda" loading="lazy" decoding="async" width="400" height="200" />
         <h3>Building &amp; Construction</h3>
         <p>We offer reliable custom homes, townhouses, office towers, retail spaces, hotels &amp; hospitality building and construction at a minimal cost with guaranteed skilled work output.</p>
         <a href="#contact" class="btn-custom" data-route="contact">REQUEST QUOTE →</a>
       </article>
 
       <article class="service-card">
-        <img src="finishing.jpg" alt="Finishing services – painting, plastering, molding in Kampala" loading="lazy" width="400" height="200" />
+        <img class="lazy-img" src="finishing.jpg" alt="Finishing services – painting, plastering, molding in Kampala" loading="lazy" decoding="async" width="400" height="200" />
         <h3>Finishing</h3>
         <p>We offer durable, luxury and comfortable finishings valuing your desires, project value and safety. We use basic painting, plastering, molding and other finishing skills.</p>
         <a href="#contact" class="btn-custom" data-route="contact">REQUEST QUOTE →</a>
       </article>
 
       <article class="service-card">
-        <img src="plan.jpg" alt="Architecture Design services – blueprints and sketches by IK Construction" loading="lazy" width="400" height="200" />
+        <img class="lazy-img" src="plan.jpg" alt="Architecture Design services – blueprints and sketches by IK Construction" loading="lazy" decoding="async" width="400" height="200" />
         <h3>Architecture Design</h3>
         <p>Accurate structure sketch development based on your vision. We use precise measurements, innovative designs, and reliable architecture trends from classical to post-modern.</p>
         <a href="#contact" class="btn-custom" data-route="contact">REQUEST QUOTE →</a>
       </article>
 
       <article class="service-card">
-        <img src="jk.jpg" alt="Infrastructure development – bridges, roads, civil works in Uganda" loading="lazy" width="400" height="200" />
+        <img class="lazy-img" src="jk.jpg" alt="Infrastructure development – bridges, roads, civil works in Uganda" loading="lazy" decoding="async" width="400" height="200" />
         <h3>Infrastructure</h3>
         <p>Quality infrastructure development for individuals, investors and government projects including bridges, roads and large-scale civil engineering works.</p>
         <a href="#contact" class="btn-custom" data-route="contact">REQUEST QUOTE →</a>
       </article>
 
       <article class="service-card">
-        <img src="rk.jpg" alt="Extensions – adding extra space to existing buildings in Kampala" loading="lazy" width="400" height="200" />
+        <img class="lazy-img" src="rk.jpg" alt="Extensions – adding extra space to existing buildings in Kampala" loading="lazy" decoding="async" width="400" height="200" />
         <h3>Extensions</h3>
         <p>Legal and non-destructive extension process. We operate according to your extension needs, creating extra space for family members or any other extension requirements.</p>
         <a href="#contact" class="btn-custom" data-route="contact">REQUEST QUOTE →</a>
       </article>
 
       <article class="service-card">
-        <img src="mrc.jpg" alt="Renovation services – updating and modernizing properties in Uganda" loading="lazy" width="400" height="200" />
+        <img class="lazy-img" src="mrc.jpg" alt="Renovation services – updating and modernizing properties in Uganda" loading="lazy" decoding="async" width="400" height="200" />
         <h3>Renovation</h3>
         <p>Flexible renovation process. We provide a variety of possible options to tackle any challenge — cost-friendly and efficient.</p>
         <a href="#contact" class="btn-custom" data-route="contact">REQUEST QUOTE →</a>
       </article>
 
       <article class="service-card">
-        <img src="INTERIOR DESIGN 1.jpg" alt="Interior designing – creating comfortable and luxurious interiors" loading="lazy" width="400" height="200" />
+        <img class="lazy-img" src="INTERIOR DESIGN 1.jpg" alt="Interior designing – creating comfortable and luxurious interiors" loading="lazy" decoding="async" width="400" height="200" />
         <h3>Interior Designing</h3>
         <p>Skillful interior designers help you create valuable, comfortable and luxurious interiors, turning your desires into comfort and elegance.</p>
         <a href="#contact" class="btn-custom" data-route="contact">REQUEST QUOTE →</a>
       </article>
 
       <article class="service-card">
-        <img src="hi.jpg" alt="Compound designing – creative outdoor spaces in Kampala" loading="lazy" width="400" height="200" />
+        <img class="lazy-img" src="hi.jpg" alt="Compound designing – creative outdoor spaces in Kampala" loading="lazy" decoding="async" width="400" height="200" />
         <h3>Compound Designing</h3>
         <p>We use creative compound designs to deliver protective, durable and expressive outdoor spaces — art meets functionality.</p>
         <a href="#contact" class="btn-custom" data-route="contact">REQUEST QUOTE →</a>
       </article>
 
       <article class="service-card">
-        <img src="mish.jpg" alt="Plumbing services – installation, repairs and maintenance in Uganda" loading="lazy" width="400" height="200" />
+        <img class="lazy-img" src="mish.jpg" alt="Plumbing services – installation, repairs and maintenance in Uganda" loading="lazy" decoding="async" width="400" height="200" />
         <h3>Plumbing</h3>
         <p>Day-to-day plumbing challenges solved: installation, repairs and maintenance. Our experienced plumbers protect water security in your community.</p>
         <a href="#contact" class="btn-custom" data-route="contact">REQUEST QUOTE →</a>
       </article>
 
       <article class="service-card">
-        <img src="hi.jpg" alt="Electrical installation – safe and certified electrical solutions" loading="lazy" width="400" height="200" />
+        <img class="lazy-img" src="hi.jpg" alt="Electrical installation – safe and certified electrical solutions" loading="lazy" decoding="async" width="400" height="200" />
         <h3>Electrical Installation</h3>
         <p>Guaranteed safe electrical installations, maintenance and repairs. Suitable for all your electrical solutions with certified electricians.</p>
         <a href="#contact" class="btn-custom" data-route="contact">REQUEST QUOTE →</a>
@@ -938,51 +949,51 @@ footer{
 
     <div class="projects-grid">
       <article class="project-item">
-        <img src="seyyid.jpg" alt="Seyyid residential project by IK Construction in Kampala" loading="lazy" width="400" height="220" />
+        <img class="lazy-img" src="seyyid.jpg" alt="Seyyid residential project by IK Construction in Kampala" loading="lazy" decoding="async" width="400" height="220" />
         <div class="project-caption"><i class="fas fa-home"></i> Seyyid Project | Residential</div>
       </article>
       <article class="project-item">
-        <img src="RECENT PROJECT 2.jpg" alt="Recent Project 2 – commercial building construction in Kampala" loading="lazy" width="400" height="220" />
+        <img class="lazy-img" src="RECENT PROJECT 2.jpg" alt="Recent Project 2 – commercial building construction in Kampala" loading="lazy" decoding="async" width="400" height="220" />
         <div class="project-caption"><i class="fas fa-school"></i> JK Education Centre | Social</div>
       </article>
       <article class="project-item">
-        <img src="RECENT PROJECT 1.jpg" alt="Recent Project 1 – residential complex completed by IK Construction" loading="lazy" width="400" height="220" />
+        <img class="lazy-img" src="RECENT PROJECT 1.jpg" alt="Recent Project 1 – residential complex completed by IK Construction" loading="lazy" decoding="async" width="400" height="220" />
         <div class="project-caption"><i class="fas fa-city"></i> Rubaga Heights | Residential</div>
       </article>
       <article class="project-item">
-        <img src="RECENT PROJECT 3.jpg" alt="Recent Project 3 – luxury villa finishing in Kampala" loading="lazy" width="400" height="220" />
+        <img class="lazy-img" src="RECENT PROJECT 3.jpg" alt="Recent Project 3 – luxury villa finishing in Kampala" loading="lazy" decoding="async" width="400" height="220" />
         <div class="project-caption"><i class="fas fa-home"></i> Kampala Villas | Luxury</div>
       </article>
       <article class="project-item">
-        <img src="RECENT PROJECT 4.jpg" alt="Recent Project 4 – high-rise office building in Kampala" loading="lazy" width="400" height="220" />
+        <img class="lazy-img" src="RECENT PROJECT 4.jpg" alt="Recent Project 4 – high-rise office building in Kampala" loading="lazy" decoding="async" width="400" height="220" />
         <div class="project-caption"><i class="fas fa-chart-line"></i> Central Business Hub</div>
       </article>
       <article class="project-item">
-        <img src="jk.jpg" alt="JK Project – social infrastructure school construction in Uganda" loading="lazy" width="400" height="220" />
+        <img class="lazy-img" src="jk.jpg" alt="JK Project – social infrastructure school construction in Uganda" loading="lazy" decoding="async" width="400" height="220" />
         <div class="project-caption"><i class="fas fa-building"></i> MRC Plaza | Commercial</div>
       </article>
       <article class="project-item">
-        <img src="INTERIOR DESIGN 1.jpg" alt="Interior Design 1 – modern interior finishing project" loading="lazy" width="400" height="220" />
+        <img class="lazy-img" src="INTERIOR DESIGN 1.jpg" alt="Interior Design 1 – modern interior finishing project" loading="lazy" decoding="async" width="400" height="220" />
         <div class="project-caption"><i class="fas fa-couch"></i> Interior Design 1</div>
       </article>
       <article class="project-item">
-        <img src="INTERIOR DESIGN 2.jpg" alt="Interior Design 2 – luxury interior design by IK Construction" loading="lazy" width="400" height="220" />
+        <img class="lazy-img" src="INTERIOR DESIGN 2.jpg" alt="Interior Design 2 – luxury interior design by IK Construction" loading="lazy" decoding="async" width="400" height="220" />
         <div class="project-caption"><i class="fas fa-couch"></i> Interior Design 2</div>
       </article>
       <article class="project-item">
-        <img src="fins.jpg" alt="Fins – finishing project example by IK Construction" loading="lazy" width="400" height="220" />
+        <img class="lazy-img" src="fins.jpg" alt="Fins – finishing project example by IK Construction" loading="lazy" decoding="async" width="400" height="220" />
         <div class="project-caption"><i class="fas fa-paint-roller"></i> Fins | Finishing</div>
       </article>
       <article class="project-item">
-        <img src="INTERIOR DESIGN 3.jpg" alt="Interior Design 3 – elegant interior design project" loading="lazy" width="400" height="220" />
+        <img class="lazy-img" src="INTERIOR DESIGN 3.jpg" alt="Interior Design 3 – elegant interior design project" loading="lazy" decoding="async" width="400" height="220" />
         <div class="project-caption"><i class="fas fa-couch"></i> Interior Design 3</div>
       </article>
       <article class="project-item">
-        <img src="rk.jpg" alt="RK Project – extension and renovation by IK Construction" loading="lazy" width="400" height="220" />
+        <img class="lazy-img" src="rk.jpg" alt="RK Project – extension and renovation by IK Construction" loading="lazy" decoding="async" width="400" height="220" />
         <div class="project-caption"><i class="fas fa-tools"></i> RK Project | Extension</div>
       </article>
       <article class="project-item">
-        <img src="SKILLED.jpg" alt="Skilled Project – skilled craftsmanship showcase" loading="lazy" width="400" height="220" />
+        <img class="lazy-img" src="SKILLED.jpg" alt="Skilled Project – skilled craftsmanship showcase" loading="lazy" decoding="async" width="400" height="220" />
         <div class="project-caption"><i class="fas fa-hard-hat"></i> Skilled Project</div>
       </article>
     </div>
@@ -1001,7 +1012,7 @@ footer{
     <h2 class="section-title" style="margin-top:50px;">About IK Construction Company</h2>
 
     <div class="about-highlight">
-      <h2 style="font-size:2rem;color:var(--secondary,#4d3e2b);">Who We Are</h2>
+      <h2 style="font-size:2rem;color:#4d3e2b;">Who We Are</h2>
       <p style="font-size:1.05rem;margin-top:12px;">
         IK CONSTRUCTION COMPANY–UGANDA is a locally founded construction company dealing in the development sector of commercial and residential infrastructure development in Uganda. Our main aim is to ensure the accessibility of commercial and residential infrastructure construction services to all citizens' construction projects, government construction projects and investors' construction projects in Uganda and along the globe.
       </p>
@@ -1017,7 +1028,7 @@ footer{
           </a>
         </div>
         <div class="founder-img-wrapper">
-          <img src="ibrah.jpg" alt="Engineer Ibrahim Kyeyune – Founder and CEO of IK Construction Company" width="180" height="180" loading="lazy" />
+          <img class="lazy-img" src="ibrah.jpg" alt="Engineer Ibrahim Kyeyune – Founder and CEO of IK Construction Company" width="180" height="180" loading="lazy" decoding="async" />
           <span class="caption"><i class="fas fa-crown" style="color:#b8860b;"></i> Founder &amp; CEO</span>
         </div>
       </div>
@@ -1127,7 +1138,7 @@ footer{
 
 </main>
 
-<!-- ==================== FOOTER (original) ==================== -->
+<!-- ==================== FOOTER ==================== -->
 <footer>
   <div class="container-custom">
     <div class="footer-grid">
@@ -1143,7 +1154,7 @@ footer{
       </div>
 
       <div class="footer-col" style="text-align:center;">
-        <img src="logo.jpg" width="300" height="200" alt="IK Construction Company Logo – Uganda's trusted building contractor" loading="lazy" style="max-width:100%;height:auto;border-radius:12px;background:#1e2a1a;padding:6px;margin:0 auto;" onerror="this.style.display='none'" />
+        <img class="lazy-img" src="logo.jpg" width="300" height="200" alt="IK Construction Company Logo – Uganda's trusted building contractor" loading="lazy" decoding="async" style="max-width:100%;height:auto;border-radius:12px;background:#1e2a1a;padding:6px;margin:0 auto;" onerror="this.style.display='none'" />
       </div>
 
       <div class="footer-col">
@@ -1163,7 +1174,7 @@ footer{
         </div>
         <span style="font-size:0.7rem;color:#bcbca5;"><i class="fas fa-code"></i> Designed by</span>
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px;">
-          <img src="brand name.png" alt="BSRC MARKETING AGENCY" style="height:60px;width:auto;max-width:120px;border-radius:12px;" loading="lazy" onerror="this.style.display='none'" />
+          <img class="lazy-img" src="brand name.png" alt="BSRC MARKETING AGENCY" style="height:60px;width:auto;max-width:120px;border-radius:12px;" loading="lazy" decoding="async" onerror="this.style.display='none'" />
           <span style="font-size:.75rem;color:#bcbca5;">Call : +256706289135</span>
         </div>
       </div>
@@ -1220,7 +1231,43 @@ footer{
   'use strict';
 
   /* ============================================================
-     1. SPA ROUTER
+     ⚡ IMAGE FADE-IN HANDLER
+     Adds .loaded class once the browser has decoded the image.
+     Works for cached images too (checks img.complete on init).
+     ============================================================ */
+  function markLoaded(img){
+    if(!img.classList.contains('lazy-img')) return;
+    img.classList.add('loaded');
+  }
+  function watchImage(img){
+    if(img.complete && img.naturalHeight !== 0){
+      markLoaded(img);
+    } else {
+      img.addEventListener('load', () => markLoaded(img), { once:true });
+      // on error, still reveal the element so layout isn't broken
+      img.addEventListener('error', () => markLoaded(img), { once:true });
+    }
+  }
+  function initImageHandlers(){
+    document.querySelectorAll('img.lazy-img').forEach(watchImage);
+    // Re-scan when navigating between pages so images in inactive
+    // sections get the .loaded class when they finally load.
+    const mo = new MutationObserver(mutations => {
+      mutations.forEach(m => {
+        m.addedNodes.forEach(n => {
+          if(n.nodeType === 1){
+            if(n.tagName === 'IMG') watchImage(n);
+            else n.querySelectorAll && n.querySelectorAll('img.lazy-img').forEach(watchImage);
+          }
+        });
+      });
+    });
+    mo.observe(document.body, { childList:true, subtree:true });
+  }
+  initImageHandlers();
+
+  /* ============================================================
+     SPA ROUTER
      ============================================================ */
   const ROUTES = ['home', 'services', 'projects', 'about', 'contact'];
   const sections = document.querySelectorAll('.page-section');
@@ -1275,7 +1322,7 @@ footer{
   showPage(currentRouteFromHash(), { noScroll: true });
 
   /* ============================================================
-     2. STAT COUNTERS
+     STAT COUNTERS
      ============================================================ */
   function animateCounters() {
     document.querySelectorAll('.stat-number').forEach(el => {
@@ -1298,7 +1345,6 @@ footer{
       requestAnimationFrame(step);
     });
   }
-
   const aboutSection = document.getElementById('page-about');
   if ('IntersectionObserver' in window && aboutSection) {
     const io = new IntersectionObserver(entries => {
@@ -1312,7 +1358,7 @@ footer{
   }
 
   /* ============================================================
-     3. BACK TO TOP
+     BACK TO TOP
      ============================================================ */
   const backTop = document.getElementById('backTop');
   window.addEventListener('scroll', () => {
@@ -1321,7 +1367,7 @@ footer{
   backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
   /* ============================================================
-     4. FORM FEEDBACK
+     FORM FEEDBACK
      ============================================================ */
   const form = document.getElementById('contact-form');
   const feedback = document.getElementById('formFeedback');
@@ -1333,13 +1379,13 @@ footer{
   }
 
   /* ============================================================
-     5. YEAR
+     YEAR
      ============================================================ */
   const yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
   /* ============================================================
-     6. CHATBOT — site-knowledge based
+     CHATBOT
      ============================================================ */
   const CONTACT = {
     phone1: '+256742184626',
