@@ -8,23 +8,22 @@
   ==========================================================================
   ⚡ IMAGE PERFORMANCE — READ ME (one-time setup for 10x faster loading) ⚡
   ==========================================================================
-  Your images are the main reason the site loads slowly. The code below
-  already does everything a browser can do, but the actual files must
-  also be optimised once.
-
-  STEP 1 — Resize: no image needs to be wider than 1200px. Downscale all
-           photos in any free tool (TinyPNG, Squoosh.app, ImageOptim, or
-           Windows Photos > Resize).
-  STEP 2 — Compress: save JPEGs at ~75–80% quality. This alone usually
-           takes a 3 MB phone photo down to 150–300 KB.
-  STEP 3 — (Optional) Convert to WebP: Squoosh.app can do this in one click.
-           WebP is ~30% smaller than JPEG at the same quality. If you convert,
-           just rename the extension and keep the same filename pattern.
+  STEP 1 — Resize: no image needs to be wider than 1200px.
+  STEP 2 — Compress: save JPEGs at ~75–80% quality. (TinyPNG / Squoosh.app)
+  STEP 3 — (Optional) Convert to WebP — ~30% smaller than JPEG.
   STEP 4 — Keep the exact same filenames so nothing below breaks.
 
-  Bonus: the biggest wins come from your largest files — the recent project
-  photos, hero background, and carousel images. Optimise those 6–8 first
-  and you'll feel the difference immediately.
+  ⚠️ IMPORTANT — fixes the "ERR_HTTP2_PROTOCOL_ERROR" you were seeing:
+  That error is the SERVER dropping the connection, almost always because
+  the image files are too large. Compress the big ones first:
+  seyyid.jpg, RECENT PROJECT 1-4.jpg, jk.jpg, plan work.jpg,
+  construction.jpg, finishing.jpg, brand name.png.
+
+  ⚠️ Also recommended: rename files that contain SPACES
+  (e.g. "RECENT PROJECT 1.jpg" → "recent-project-1.jpg",
+   "plan work.jpg" → "plan-work.jpg",
+   "brand name.png" → "brand-name.png").
+  Spaces must be URL-encoded and some servers choke on them.
   ==========================================================================
 -->
 
@@ -62,17 +61,17 @@
 <link rel="icon" href="logo.jpg" type="image/jpeg" />
 
 <!-- ==================== PERFORMANCE HINTS ==================== -->
-<link rel="preconnect" href="https://cdn.jsdelivr.net" />
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-<!-- ⚡ Preload the hero background image so it starts downloading immediately -->
+<!-- ⚡ Preload the hero background image (LCP element) -->
 <link rel="preload" as="image" href="seyyid.jpg" fetchpriority="high" />
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+<!-- Font Awesome only — Bootstrap has been removed entirely (saves ~280KB
+     and removes the "Tracking Prevention blocked access to storage" warning) -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
 <!-- ⚡ Flag that JS is enabled — used to enable the fade-in effect only when JS can undo it -->
 <script>document.documentElement.className += ' js-enabled';</script>
@@ -160,8 +159,8 @@ button{font-family:inherit;}
 
 /* ============================================================
    ⚡ IMAGE LOADING — SKELETON SHIMMER + FADE-IN
-   Only applied when JS is enabled (html.js-enabled).
-   Without JS, images render normally with no hiding.
+   Only applied when JS is enabled. A safety timer in the script
+   guarantees every image is revealed even if a load event is missed.
    ============================================================ */
 html.js-enabled img.lazy-img{
   background:linear-gradient(90deg,#ece6d8 0%,#f5f0e4 50%,#ece6d8 100%);
@@ -179,7 +178,6 @@ html.js-enabled img.lazy-img.loaded{
   0%   { background-position: 200% 0; }
   100% { background-position:-200% 0; }
 }
-/* Respect users who prefer reduced motion */
 @media (prefers-reduced-motion:reduce){
   html.js-enabled img.lazy-img{animation:none;opacity:1;background:transparent;}
   html.js-enabled img.lazy-img.loaded{transition:none;}
@@ -199,7 +197,7 @@ html.js-enabled img.lazy-img.loaded{
 .btn-custom:focus-visible{outline:3px solid var(--gold);outline-offset:2px;}
 
 /* =====================================================
-   HEADER — ORIGINAL STICKY NAV (preserved)
+   HEADER — STICKY NAV
    ===================================================== */
 .sticky-nav {
     position: sticky;
@@ -362,29 +360,64 @@ html.js-enabled img.lazy-img.loaded{
   box-shadow:var(--shadow-sm);transition:transform .25s,box-shadow .25s;
 }
 .project-item:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg);}
-.project-item img{width:100%;height:220px;object-fit:cover;transition:transform .4s ease;}
+.project-item img{width:100%;height:220px;object-fit:cover;transition:transform .4s ease;background:#ece6d8;}
 .project-item:hover img{transform:scale(1.05);}
 .project-caption{padding:14px 16px;text-align:center;font-weight:600;color:var(--forest-dark);font-size:.92rem;}
 .project-caption i{color:var(--gold);margin-right:6px;}
 
-/* ============ SERVICES CAROUSEL ============ */
-.c-item{height:440px;border-radius:0 0 32px 32px;overflow:hidden;background:#1a1a1a;}
-.c-img{height:100%;object-fit:cover;filter:brightness(.62);}
-.carousel-caption-custom{
-  position:absolute;top:0;left:0;right:0;bottom:0;
+/* ============ SERVICES SLIDER (replaces Bootstrap carousel) ============ */
+.hero-slider{
+  position:relative;height:440px;overflow:hidden;
+  border-radius:0 0 32px 32px;background:#1a1a1a;
+}
+.slide{
+  position:absolute;inset:0;opacity:0;visibility:hidden;
+  transition:opacity .7s ease,visibility .7s ease;
+}
+.slide.is-active{opacity:1;visibility:visible;}
+.slide img{width:100%;height:100%;object-fit:cover;filter:brightness(.62);background:#1a1a1a;}
+.slide-caption{
+  position:absolute;inset:0;
   display:flex;flex-direction:column;justify-content:center;align-items:flex-start;
   padding:2rem clamp(1rem,6vw,4rem);color:#fff;text-align:left;
 }
-.carousel-caption-custom .eyebrow{
+.slide-caption .eyebrow{
   font-size:.8rem;letter-spacing:2px;text-transform:uppercase;
   color:#d4f1c6;margin-bottom:.5rem;font-weight:600;
 }
-.carousel-caption-custom h2{
+.slide-caption h2{
   font-size:clamp(1.6rem,5vw,3rem);font-weight:900;line-height:1.15;
   text-shadow:2px 3px 12px rgba(0,0,0,.5);margin-bottom:1rem;max-width:640px;
 }
-.carousel-caption-custom .btn-custom{margin-top:.4rem;}
-@media (max-width:640px){ .c-item{height:360px;} }
+.slide-caption .btn-custom{margin-top:.4rem;}
+.slider-nav{
+  position:absolute;top:50%;transform:translateY(-50%);z-index:3;
+  width:46px;height:46px;border-radius:50%;border:none;
+  background:rgba(0,0,0,.45);color:#fff;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .2s ease,transform .2s ease;
+}
+.slider-nav:hover{background:rgba(0,0,0,.72);}
+.slider-nav:focus-visible{outline:3px solid var(--gold);outline-offset:2px;}
+.slider-nav.prev{left:14px;}
+.slider-nav.next{right:14px;}
+.slider-dots{
+  position:absolute;bottom:16px;left:50%;transform:translateX(-50%);
+  display:flex;gap:9px;z-index:3;
+}
+.slider-dots button{
+  width:11px;height:11px;padding:0;border-radius:50%;
+  border:2px solid rgba(255,255,255,.75);background:transparent;cursor:pointer;
+  transition:background .2s ease,transform .2s ease;
+}
+.slider-dots button.is-active{background:#fff;transform:scale(1.2);}
+.slider-dots button:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+@media (max-width:640px){
+  .hero-slider{height:360px;}
+  .slider-nav{width:38px;height:38px;}
+  .slider-nav.prev{left:8px;}
+  .slider-nav.next{right:8px;}
+}
 
 /* ============ SERVICES DEEP GRID ============ */
 .services-deep-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px;margin:24px 0 40px;}
@@ -431,13 +464,29 @@ html.js-enabled img.lazy-img.loaded{
   .founder-text{text-align:center;}
 }
 
-/* ============ FAQ ============ */
+/* ============ FAQ (native <details> — zero JS, zero dependencies) ============ */
 .faq-wrap{margin:20px 0 50px;}
-.accordion-item{border-radius:20px !important;overflow:hidden;margin-bottom:12px;border:1px solid #e2dccf;background:#fff;}
-.accordion-button{font-weight:600;font-size:.95rem;color:#2d3e2b;padding:18px 22px;}
-.accordion-button:not(.collapsed){background:#f5efdf;color:#4a3a20;box-shadow:none;}
-.accordion-button:focus{box-shadow:0 0 0 3px rgba(201,126,58,.25);border-color:transparent;}
-.accordion-body{font-size:.92rem;color:var(--ink-soft);line-height:1.6;}
+.faq-item{
+  background:#fff;border:1px solid #e2dccf;border-radius:20px;
+  margin-bottom:12px;overflow:hidden;transition:box-shadow .2s ease;
+}
+.faq-item[open]{box-shadow:var(--shadow-sm);}
+.faq-item summary{
+  list-style:none;cursor:pointer;position:relative;
+  padding:18px 56px 18px 22px;
+  font-weight:600;font-size:.95rem;color:#2d3e2b;line-height:1.45;
+}
+.faq-item summary::-webkit-details-marker{display:none;}
+.faq-item summary::after{
+  content:'+';position:absolute;right:22px;top:50%;
+  transform:translateY(-50%);transform-origin:center;
+  font-size:1.45rem;font-weight:400;line-height:1;color:var(--primary);
+  transition:transform .25s ease;
+}
+.faq-item[open] summary{background:#f5efdf;color:#4a3a20;}
+.faq-item[open] summary::after{transform:translateY(-50%) rotate(45deg);}
+.faq-item summary:focus-visible{outline:3px solid rgba(201,126,58,.35);outline-offset:-3px;}
+.faq-body{padding:16px 22px 20px;font-size:.92rem;color:var(--ink-soft);line-height:1.6;}
 
 /* ============ CONTACT ============ */
 .contact-wrapper{
@@ -616,7 +665,7 @@ footer{
 <body>
 
 <!-- =====================================================
-     HEADER — ORIGINAL STICKY NAV
+     HEADER — STICKY NAV
      ===================================================== -->
 <div class="sticky-nav">
     <div class="top-contact-bar">
@@ -762,46 +811,48 @@ footer{
 <!-- ============================================================= -->
 <section id="page-services" class="page-section" data-page="services" aria-label="Services page">
 
-  <div id="servicesCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4500">
-    <div class="carousel-indicators">
-      <button type="button" data-bs-target="#servicesCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Planning and Consultations"></button>
-      <button type="button" data-bs-target="#servicesCarousel" data-bs-slide-to="1" aria-label="Building and Construction"></button>
-      <button type="button" data-bs-target="#servicesCarousel" data-bs-slide-to="2" aria-label="Finishing and Designing"></button>
-    </div>
-    <div class="carousel-inner">
-      <div class="carousel-item active c-item">
-        <img class="d-block w-100 c-img lazy-img" src="plan work.jpg" alt="Planning and Consultations for construction projects in Kampala" loading="eager" decoding="async" fetchpriority="high" width="1200" height="440" />
-        <div class="carousel-caption-custom">
-          <p class="eyebrow">We provide reliable</p>
-          <h2>Planning and Consultations.</h2>
-          <a href="#contact" class="btn-custom" data-route="contact">REQUEST QUOTE →</a>
-        </div>
-      </div>
-      <div class="carousel-item c-item">
-        <img class="d-block w-100 c-img lazy-img" src="construction.jpg" alt="Building and Construction services by IK Construction in Uganda" loading="lazy" decoding="async" width="1200" height="440" />
-        <div class="carousel-caption-custom">
-          <p class="eyebrow">We exhibit our skills in</p>
-          <h2>Building and Construction</h2>
-          <a href="#contact" class="btn-custom" data-route="contact">REQUEST A QUOTE →</a>
-        </div>
-      </div>
-      <div class="carousel-item c-item">
-        <img class="d-block w-100 c-img lazy-img" src="finishing.jpg" alt="Luxury finishing and designing services in Kampala" loading="lazy" decoding="async" width="1200" height="440" />
-        <div class="carousel-caption-custom">
-          <p class="eyebrow">We use the latest and luxury</p>
-          <h2>Finishing and Designing.</h2>
-          <a href="#contact" class="btn-custom" data-route="contact">REQUEST QUOTE →</a>
-        </div>
+  <!-- ⚡ Lightweight custom slider — replaces Bootstrap carousel -->
+  <div class="hero-slider" id="servicesSlider" aria-roledescription="carousel" aria-label="Our construction services">
+
+    <div class="slide is-active" role="group" aria-roledescription="slide" aria-label="1 of 3">
+      <img src="plan work.jpg" alt="Planning and Consultations for construction projects in Kampala" loading="eager" decoding="async" fetchpriority="high" width="1200" height="440" />
+      <div class="slide-caption">
+        <p class="eyebrow">We provide reliable</p>
+        <h2>Planning and Consultations.</h2>
+        <a href="#contact" class="btn-custom" data-route="contact">REQUEST QUOTE →</a>
       </div>
     </div>
-    <button class="carousel-control-prev" type="button" data-bs-target="#servicesCarousel" data-bs-slide="prev">
-      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-      <span class="visually-hidden">Previous</span>
+
+    <div class="slide" role="group" aria-roledescription="slide" aria-label="2 of 3">
+      <img src="construction.jpg" alt="Building and Construction services by IK Construction in Uganda" loading="lazy" decoding="async" width="1200" height="440" />
+      <div class="slide-caption">
+        <p class="eyebrow">We exhibit our skills in</p>
+        <h2>Building and Construction</h2>
+        <a href="#contact" class="btn-custom" data-route="contact">REQUEST A QUOTE →</a>
+      </div>
+    </div>
+
+    <div class="slide" role="group" aria-roledescription="slide" aria-label="3 of 3">
+      <img src="finishing.jpg" alt="Luxury finishing and designing services in Kampala" loading="lazy" decoding="async" width="1200" height="440" />
+      <div class="slide-caption">
+        <p class="eyebrow">We use the latest and luxury</p>
+        <h2>Finishing and Designing.</h2>
+        <a href="#contact" class="btn-custom" data-route="contact">REQUEST QUOTE →</a>
+      </div>
+    </div>
+
+    <button class="slider-nav prev" type="button" aria-label="Previous slide">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#servicesCarousel" data-bs-slide="next">
-      <span class="carousel-control-next-icon" aria-hidden="true"></span>
-      <span class="visually-hidden">Next</span>
+    <button class="slider-nav next" type="button" aria-label="Next slide">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
     </button>
+
+    <div class="slider-dots" role="tablist" aria-label="Choose slide">
+      <button type="button" class="is-active" role="tab" aria-selected="true" aria-label="Slide 1"></button>
+      <button type="button" role="tab" aria-selected="false" aria-label="Slide 2"></button>
+      <button type="button" role="tab" aria-selected="false" aria-label="Slide 3"></button>
+    </div>
   </div>
 
   <div class="container-custom">
@@ -882,59 +933,35 @@ footer{
 
     <h2 class="section-title">Frequently Asked Questions</h2>
     <div class="faq-wrap">
-      <div class="accordion" id="accordionExample">
-        <div class="accordion-item">
-          <h3 class="accordion-header" id="h1">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-              After inquiring for your services, are you responsible for material search or am I responsible?
-            </button>
-          </h3>
-          <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="h1" data-bs-parent="#accordionExample">
-            <div class="accordion-body">
-              Material supply depends on negotiation between us and the client. If you prefer handling the task, we cooperate strongly with your suppliers. If you hand over the task to our team, we involve our trustworthy suppliers.
-            </div>
-          </div>
-        </div>
 
-        <div class="accordion-item">
-          <h3 class="accordion-header" id="h2">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-              Do you have authorised skilled and trained labour for our projects?
-            </button>
-          </h3>
-          <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="h2" data-bs-parent="#accordionExample">
-            <div class="accordion-body">
-              Yes, we use registered, approved architects, civil engineers, mechanical engineers, builders and certified craftsmen, each with a minimum national certificate and 6 months of verifiable experience.
-            </div>
-          </div>
+      <details class="faq-item" open>
+        <summary>After inquiring for your services, are you responsible for material search or am I responsible?</summary>
+        <div class="faq-body">
+          Material supply depends on negotiation between us and the client. If you prefer handling the task, we cooperate strongly with your suppliers. If you hand over the task to our team, we involve our trustworthy suppliers.
         </div>
+      </details>
 
-        <div class="accordion-item">
-          <h3 class="accordion-header" id="h3">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-              How do you handle legal building laws enforcement for all building classes?
-            </button>
-          </h3>
-          <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="h3" data-bs-parent="#accordionExample">
-            <div class="accordion-body">
-              We strictly follow and enforce legal building laws. During consultation, we help clients understand how to obtain building permits and avoid penalties, ensuring full compliance.
-            </div>
-          </div>
+      <details class="faq-item">
+        <summary>Do you have authorised skilled and trained labour for our projects?</summary>
+        <div class="faq-body">
+          Yes, we use registered, approved architects, civil engineers, mechanical engineers, builders and certified craftsmen, each with a minimum national certificate and 6 months of verifiable experience.
         </div>
+      </details>
 
-        <div class="accordion-item">
-          <h3 class="accordion-header" id="h4">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
-              How far do you operate from your headquarters?
-            </button>
-          </h3>
-          <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="h4" data-bs-parent="#accordionExample">
-            <div class="accordion-body">
-              We are highly versatile and can operate in every region of Uganda, as long as the site is accessible and basic human needs are available.
-            </div>
-          </div>
+      <details class="faq-item">
+        <summary>How do you handle legal building laws enforcement for all building classes?</summary>
+        <div class="faq-body">
+          We strictly follow and enforce legal building laws. During consultation, we help clients understand how to obtain building permits and avoid penalties, ensuring full compliance.
         </div>
-      </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>How far do you operate from your headquarters?</summary>
+        <div class="faq-body">
+          We are highly versatile and can operate in every region of Uganda, as long as the site is accessible and basic human needs are available.
+        </div>
+      </details>
+
     </div>
   </div>
 </section>
@@ -1222,9 +1249,6 @@ footer{
   </div>
 </div>
 
-<!-- ==================== BOOTSTRAP JS ==================== -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous" defer></script>
-
 <!-- ==================== APP SCRIPT ==================== -->
 <script>
 (function () {
@@ -1232,8 +1256,9 @@ footer{
 
   /* ============================================================
      ⚡ IMAGE FADE-IN HANDLER
-     Adds .loaded class once the browser has decoded the image.
-     Works for cached images too (checks img.complete on init).
+     Reveals each lazy image once it has decoded. A safety sweep
+     guarantees nothing stays hidden if a load event is missed
+     (Chrome defers load events for lazy images).
      ============================================================ */
   function markLoaded(img){
     if(!img.classList.contains('lazy-img')) return;
@@ -1243,46 +1268,57 @@ footer{
     if(img.complete && img.naturalHeight !== 0){
       markLoaded(img);
     } else {
-      img.addEventListener('load', () => markLoaded(img), { once:true });
-      // on error, still reveal the element so layout isn't broken
-      img.addEventListener('error', () => markLoaded(img), { once:true });
+      img.addEventListener('load', function(){ markLoaded(img); }, { once:true });
+      img.addEventListener('error', function(){ markLoaded(img); }, { once:true });
     }
+  }
+  function scanImages(root){
+    if(!root || root.nodeType !== 1) return;
+    if(root.tagName === 'IMG'){ watchImage(root); return; }
+    if(root.querySelectorAll) root.querySelectorAll('img.lazy-img').forEach(watchImage);
   }
   function initImageHandlers(){
     document.querySelectorAll('img.lazy-img').forEach(watchImage);
-    // Re-scan when navigating between pages so images in inactive
-    // sections get the .loaded class when they finally load.
-    const mo = new MutationObserver(mutations => {
-      mutations.forEach(m => {
-        m.addedNodes.forEach(n => {
-          if(n.nodeType === 1){
-            if(n.tagName === 'IMG') watchImage(n);
-            else n.querySelectorAll && n.querySelectorAll('img.lazy-img').forEach(watchImage);
-          }
-        });
+
+    var mo = new MutationObserver(function(mutations){
+      mutations.forEach(function(m){
+        m.addedNodes.forEach(function(n){ scanImages(n); });
       });
     });
     mo.observe(document.body, { childList:true, subtree:true });
+
+    /* Safety sweep — never leave an image invisible */
+    setTimeout(function(){
+      document.querySelectorAll('img.lazy-img').forEach(markLoaded);
+    }, 4000);
+    window.addEventListener('load', function(){
+      setTimeout(function(){
+        document.querySelectorAll('img.lazy-img').forEach(function(img){
+          if(img.complete) markLoaded(img);
+        });
+      }, 300);
+    });
   }
   initImageHandlers();
 
   /* ============================================================
      SPA ROUTER
      ============================================================ */
-  const ROUTES = ['home', 'services', 'projects', 'about', 'contact'];
-  const sections = document.querySelectorAll('.page-section');
-  const navLinks = document.querySelectorAll('.main-nav a[data-route]');
+  var ROUTES = ['home', 'services', 'projects', 'about', 'contact'];
+  var sections = document.querySelectorAll('.page-section');
+  var navLinks = document.querySelectorAll('.main-nav a[data-route]');
 
   function showPage(route, opts) {
-    if (!ROUTES.includes(route)) route = 'home';
+    if (ROUTES.indexOf(route) === -1) route = 'home';
 
-    sections.forEach(sec => {
+    sections.forEach(function(sec){
       sec.classList.toggle('is-active', sec.dataset.page === route);
     });
 
-    navLinks.forEach(a => {
-      a.classList.toggle('active', a.dataset.route === route);
-      if (a.dataset.route === route) a.setAttribute('aria-current', 'page');
+    navLinks.forEach(function(a){
+      var match = a.dataset.route === route;
+      a.classList.toggle('active', match);
+      if (match) a.setAttribute('aria-current', 'page');
       else a.removeAttribute('aria-current');
     });
 
@@ -1290,7 +1326,7 @@ footer{
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    const titles = {
+    var titles = {
       home: 'IK Construction Company Uganda | Building Contractors Kampala | Free Quote',
       services: 'Construction Services in Kampala | IK Construction Company Uganda',
       projects: 'Our Successful Projects | IK Construction Company Uganda',
@@ -1301,14 +1337,14 @@ footer{
   }
 
   function currentRouteFromHash() {
-    const h = (location.hash || '#home').replace('#', '');
-    return ROUTES.includes(h) ? h : 'home';
+    var h = (location.hash || '#home').replace('#', '');
+    return ROUTES.indexOf(h) !== -1 ? h : 'home';
   }
 
   document.addEventListener('click', function (e) {
-    const link = e.target.closest('[data-route]');
+    var link = e.target.closest('[data-route]');
     if (!link) return;
-    const route = link.dataset.route;
+    var route = link.dataset.route;
     if (!route) return;
     e.preventDefault();
     if (location.hash !== '#' + route) {
@@ -1317,38 +1353,118 @@ footer{
     showPage(route);
   });
 
-  window.addEventListener('hashchange', () => showPage(currentRouteFromHash()));
-  window.addEventListener('popstate', () => showPage(currentRouteFromHash()));
+  window.addEventListener('hashchange', function(){ showPage(currentRouteFromHash()); });
+  window.addEventListener('popstate', function(){ showPage(currentRouteFromHash()); });
   showPage(currentRouteFromHash(), { noScroll: true });
+
+  /* ============================================================
+     SERVICES SLIDER (lightweight, no library)
+     ============================================================ */
+  (function initSlider(){
+    var slider = document.getElementById('servicesSlider');
+    if(!slider) return;
+
+    var slides = Array.prototype.slice.call(slider.querySelectorAll('.slide'));
+    var dots   = Array.prototype.slice.call(slider.querySelectorAll('.slider-dots button'));
+    var prev   = slider.querySelector('.slider-nav.prev');
+    var next   = slider.querySelector('.slider-nav.next');
+    if(slides.length < 2) return;
+
+    var idx = 0, timer = null;
+    var INTERVAL = 4500;
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function go(i){
+      idx = (i + slides.length) % slides.length;
+      slides.forEach(function(s, n){ s.classList.toggle('is-active', n === idx); });
+      dots.forEach(function(d, n){
+        var on = n === idx;
+        d.classList.toggle('is-active', on);
+        d.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+    }
+    function tick(){
+      /* Skip work while the Services page is hidden */
+      if(!slider.offsetParent) return;
+      go(idx + 1);
+    }
+    function start(){
+      if(reduceMotion) return;
+      stop();
+      timer = setInterval(tick, INTERVAL);
+    }
+    function stop(){ if(timer){ clearInterval(timer); timer = null; } }
+    function restart(){ stop(); start(); }
+
+    prev.addEventListener('click', function(){ go(idx - 1); restart(); });
+    next.addEventListener('click', function(){ go(idx + 1); restart(); });
+    dots.forEach(function(d, n){
+      d.addEventListener('click', function(){ go(n); restart(); });
+    });
+
+    /* Pause when the tab is hidden (saves battery / CPU) */
+    document.addEventListener('visibilitychange', function(){
+      if(document.hidden) stop(); else start();
+    });
+
+    /* Swipe support */
+    var x0 = null;
+    slider.addEventListener('touchstart', function(e){
+      x0 = e.touches[0].clientX; stop();
+    }, { passive:true });
+    slider.addEventListener('touchend', function(e){
+      if(x0 === null) return;
+      var dx = e.changedTouches[0].clientX - x0;
+      if(Math.abs(dx) > 40) go(dx < 0 ? idx + 1 : idx - 1);
+      x0 = null;
+      start();
+    }, { passive:true });
+
+    go(0);
+    start();
+  })();
+
+  /* ============================================================
+     FAQ — only one open at a time
+     ============================================================ */
+  (function initFaq(){
+    var items = document.querySelectorAll('.faq-item');
+    items.forEach(function(item){
+      item.addEventListener('toggle', function(){
+        if(!item.open) return;
+        items.forEach(function(other){
+          if(other !== item) other.open = false;
+        });
+      });
+    });
+  })();
 
   /* ============================================================
      STAT COUNTERS
      ============================================================ */
   function animateCounters() {
-    document.querySelectorAll('.stat-number').forEach(el => {
+    document.querySelectorAll('.stat-number').forEach(function(el){
       if (el.dataset.animated === '1') return;
-      const target = parseInt(el.dataset.count, 10);
-      const suffix = el.dataset.suffix || '';
+      var target = parseInt(el.dataset.count, 10);
+      var suffix = el.dataset.suffix || '';
       if (isNaN(target)) return;
       el.dataset.animated = '1';
-      let current = 0;
-      const duration = 1200;
-      const start = performance.now();
+      var duration = 1200;
+      var start = performance.now();
       function step(now) {
-        const p = Math.min((now - start) / duration, 1);
-        const eased = 1 - Math.pow(1 - p, 3);
-        current = Math.round(target * eased);
-        el.textContent = current + suffix;
+        var p = Math.min((now - start) / duration, 1);
+        var eased = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.round(target * eased) + suffix;
         if (p < 1) requestAnimationFrame(step);
         else el.textContent = target + suffix;
       }
       requestAnimationFrame(step);
     });
   }
-  const aboutSection = document.getElementById('page-about');
+  var aboutSection = document.getElementById('page-about');
   if ('IntersectionObserver' in window && aboutSection) {
-    const io = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
         if (entry.isIntersecting && entry.target.classList.contains('is-active')) {
           animateCounters();
         }
@@ -1360,17 +1476,23 @@ footer{
   /* ============================================================
      BACK TO TOP
      ============================================================ */
-  const backTop = document.getElementById('backTop');
-  window.addEventListener('scroll', () => {
-    backTop.classList.toggle('show', window.scrollY > 400);
+  var backTop = document.getElementById('backTop');
+  var scrollTicking = false;
+  window.addEventListener('scroll', function(){
+    if(scrollTicking) return;
+    scrollTicking = true;
+    requestAnimationFrame(function(){
+      backTop.classList.toggle('show', window.scrollY > 400);
+      scrollTicking = false;
+    });
   }, { passive: true });
-  backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  backTop.addEventListener('click', function(){ window.scrollTo({ top: 0, behavior: 'smooth' }); });
 
   /* ============================================================
      FORM FEEDBACK
      ============================================================ */
-  const form = document.getElementById('contact-form');
-  const feedback = document.getElementById('formFeedback');
+  var form = document.getElementById('contact-form');
+  var feedback = document.getElementById('formFeedback');
   if (form) {
     form.addEventListener('submit', function () {
       feedback.textContent = 'Sending your message…';
@@ -1381,13 +1503,13 @@ footer{
   /* ============================================================
      YEAR
      ============================================================ */
-  const yearEl = document.getElementById('year');
+  var yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
   /* ============================================================
      CHATBOT
      ============================================================ */
-  const CONTACT = {
+  var CONTACT = {
     phone1: '+256742184626',
     phone2: '+256774448990',
     email: 'ikconstructioncompany@gmail.com',
@@ -1395,7 +1517,7 @@ footer{
     hours: 'Monday – Friday, 8:00 AM – 6:00 PM'
   };
 
-  const KB = [
+  var KB = [
     { id:'greeting',
       keywords:['hello','hi','hey','good morning','good afternoon','good evening','greetings','yo','hi there','hello there'],
       response:'Hello! 👋 Welcome to <strong>IK Construction Company</strong>. I can help you with our services, projects, pricing, location, contact details, or booking a free quote. What would you like to know?'
@@ -1571,126 +1693,129 @@ footer{
     return ' ' + str.toLowerCase().replace(/[^\w\s']/g,' ').replace(/\s+/g,' ').trim() + ' ';
   }
   function findBestMatch(userText){
-    const text = normalize(userText);
+    var text = normalize(userText);
     if(!text.trim()) return null;
-    let best=null, bestScore=0;
-    for(const entry of KB){
-      let score=0;
-      for(const kw of entry.keywords){
-        const k=normalize(kw).trim();
+    var best = null, bestScore = 0;
+    for(var i = 0; i < KB.length; i++){
+      var entry = KB[i], score = 0;
+      for(var j = 0; j < entry.keywords.length; j++){
+        var k = normalize(entry.keywords[j]).trim();
         if(!k) continue;
-        if(text.includes(' '+k+' ') || text.includes(' '+k)){
+        if(text.indexOf(' ' + k + ' ') !== -1 || text.indexOf(' ' + k) !== -1){
           score += k.split(' ').length * 2 + 1;
         }
       }
-      if(score>bestScore){ bestScore=score; best=entry; }
+      if(score > bestScore){ bestScore = score; best = entry; }
     }
-    return bestScore>0 ? best : null;
+    return bestScore > 0 ? best : null;
   }
 
-  const toggleBtn=document.getElementById('chat-toggle');
-  const toggleIcon=document.getElementById('chat-toggle-icon');
-  const badge=document.getElementById('chat-badge');
-  const panel=document.getElementById('chat-panel');
-  const closeBtn=document.getElementById('chat-close');
-  const body=document.getElementById('chat-body');
-  const input=document.getElementById('chat-input');
-  const sendBtn=document.getElementById('chat-send');
-  const quickWrap=document.getElementById('chat-quick');
+  var toggleBtn  = document.getElementById('chat-toggle');
+  var toggleIcon = document.getElementById('chat-toggle-icon');
+  var badge      = document.getElementById('chat-badge');
+  var panel      = document.getElementById('chat-panel');
+  var closeBtn   = document.getElementById('chat-close');
+  var body       = document.getElementById('chat-body');
+  var input      = document.getElementById('chat-input');
+  var sendBtn    = document.getElementById('chat-send');
+  var quickWrap  = document.getElementById('chat-quick');
 
-  let greeted=false, busy=false;
+  var greeted = false, busy = false;
 
   function openChat(){
     panel.classList.add('open');
     toggleBtn.classList.add('open');
     toggleBtn.setAttribute('aria-expanded','true');
-    toggleIcon.className='fas fa-times';
-    badge.style.display='none';
+    toggleIcon.className = 'fas fa-times';
+    badge.style.display = 'none';
     if(!greeted){
-      greeted=true;
-      setTimeout(()=>{
+      greeted = true;
+      setTimeout(function(){
         botSay('Hello! 👋 I\'m the <strong>IK Construction assistant</strong>. Ask me anything about our services, projects, pricing or how to get a free quote. You can also tap a quick option below.');
-      },250);
+      }, 250);
     }
-    setTimeout(()=>input.focus(),400);
+    setTimeout(function(){ input.focus(); }, 400);
   }
   function closeChat(){
     panel.classList.remove('open');
     toggleBtn.classList.remove('open');
     toggleBtn.setAttribute('aria-expanded','false');
-    toggleIcon.className='fas fa-comments';
+    toggleIcon.className = 'fas fa-comments';
   }
-  toggleBtn.addEventListener('click',()=>{
-    panel.classList.contains('open') ? closeChat() : openChat();
+  toggleBtn.addEventListener('click', function(){
+    if(panel.classList.contains('open')) closeChat(); else openChat();
   });
-  closeBtn.addEventListener('click',closeChat);
-  document.addEventListener('keydown',e=>{
-    if(e.key==='Escape' && panel.classList.contains('open')) closeChat();
+  closeBtn.addEventListener('click', closeChat);
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && panel.classList.contains('open')) closeChat();
   });
 
-  function addMessage(html,who){
-    const div=document.createElement('div');
-    div.className='msg '+who;
-    div.innerHTML=html;
+  function addMessage(html, who){
+    var div = document.createElement('div');
+    div.className = 'msg ' + who;
+    div.innerHTML = html;
     body.appendChild(div);
-    body.scrollTop=body.scrollHeight;
+    body.scrollTop = body.scrollHeight;
     return div;
   }
   function showTyping(){
-    const t=document.createElement('div');
-    t.className='typing';
-    t.innerHTML='<span></span><span></span><span></span>';
+    var t = document.createElement('div');
+    t.className = 'typing';
+    t.innerHTML = '<span></span><span></span><span></span>';
     body.appendChild(t);
-    body.scrollTop=body.scrollHeight;
+    body.scrollTop = body.scrollHeight;
     return t;
   }
-  function botSay(html,delay){
-    busy=true;
-    const typing=showTyping();
-    const wait = delay != null ? delay : Math.min(900, 380 + html.length*2);
-    setTimeout(()=>{
+  function botSay(html, delay){
+    busy = true;
+    var typing = showTyping();
+    var wait = delay != null ? delay : Math.min(900, 380 + html.length * 2);
+    setTimeout(function(){
       typing.remove();
-      addMessage(html,'bot');
-      busy=false;
-    },wait);
+      addMessage(html, 'bot');
+      busy = false;
+    }, wait);
   }
-  function userSay(text){ addMessage(escapeHtml(text),'user'); }
+  function userSay(text){ addMessage(escapeHtml(text), 'user'); }
   function escapeHtml(s){
-    return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+    return s.replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
   }
 
   function handleSend(text){
-    const msg=(text||'').trim();
+    var msg = (text || '').trim();
     if(!msg || busy) return;
     userSay(msg);
-    input.value='';
-    const match=findBestMatch(msg);
-    if(match){ botSay(match.response); }
-    else{
+    input.value = '';
+    var match = findBestMatch(msg);
+    if(match){
+      botSay(match.response);
+    } else {
       botSay('Hmm, I\'m not sure I understood that fully. 🤔<br><br>'+
         'I can help with <strong>our services</strong>, <strong>projects</strong>, <strong>pricing</strong>, <strong>location</strong>, <strong>contact details</strong> and <strong>free quotes</strong>.<br><br>'+
         'For anything more specific, please <a href="#contact" data-route="contact">contact our team</a> or call <strong>'+CONTACT.phone2+'</strong>.');
     }
   }
 
-  sendBtn.addEventListener('click',()=>handleSend(input.value));
-  input.addEventListener('keydown',e=>{
-    if(e.key==='Enter'){ e.preventDefault(); handleSend(input.value); }
+  sendBtn.addEventListener('click', function(){ handleSend(input.value); });
+  input.addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){ e.preventDefault(); handleSend(input.value); }
   });
-  quickWrap.addEventListener('click',e=>{
-    const btn=e.target.closest('button[data-q]');
+  quickWrap.addEventListener('click', function(e){
+    var btn = e.target.closest('button[data-q]');
     if(!btn) return;
     handleSend(btn.dataset.q);
   });
 
-  let nudged=false;
-  window.addEventListener('scroll',()=>{
+  var nudged = false;
+  window.addEventListener('scroll', function(){
     if(nudged) return;
-    if(window.scrollY>900 && !panel.classList.contains('open')){
-      nudged=true;
-      badge.style.display='block';
+    if(window.scrollY > 900 && !panel.classList.contains('open')){
+      nudged = true;
+      badge.style.display = 'block';
     }
-  },{passive:true});
+  }, { passive:true });
 
 })();
 </script>
